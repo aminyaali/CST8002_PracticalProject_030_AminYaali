@@ -1,114 +1,42 @@
-﻿/*
+/*
  * CST8002 Programming Language Research Project
- * Practical Project 1
+ * Practical Project 2 - Project Review I
  *
  * Author: Amin Yaali
  * Professor: Gustavo Adami
- * Due Date: May 31, 2026
+ * Due Date: See Brightspace
  *
  * References:
  * [1] CsvHelper Documentation, https://joshclose.github.io/CsvHelper/
- * [2] Microsoft Learn C# Documentation,
- *     https://learn.microsoft.com/
+ * [2] Microsoft Learn C# Documentation, https://learn.microsoft.com/
  */
 
+using Project_2.Business;
+using Project_2.Persistence;
+using Project_2.Presentation;
 
-using CsvHelper;
-using CsvHelper.Configuration;
-using System.Globalization;
-
-namespace Project_1
+namespace Project_2
 {
+    /// <summary>
+    /// Application entry point. This class only wires the three layers together
+    /// (Persistence, Business, Presentation) and starts the interactive menu; it
+    /// contains no business logic, no file handling, and no console interaction of
+    /// its own.
+    /// </summary>
     internal class Program
     {
+        /// <summary>Path to the source data set CSV file used by the persistence layer.</summary>
+        private const string DataSetFilePath = "CanadianBeaufortSea_Invert_MeHg&SI_EN_FR.csv";
+
+        /// <summary>Application entry point.</summary>
+        /// <param name="args">Command-line arguments (unused).</param>
         static void Main(string[] args)
         {
-            Console.WriteLine("Amin Yaali");
-            Console.WriteLine();
+            var fileManager = new DatasetFileManager(DataSetFilePath);
+            var recordManager = new RecordManager(fileManager);
+            var menu = new MenuPresenter(recordManager);
 
-            try
-            {
-                string fileName = "CanadianBeaufortSea_Invert_MeHg&SI_EN_FR.csv";
-
-                var records = new List<DatasetRecord>();
-
-                using (var reader = new StreamReader(fileName))
-                {
-                    // Skip metadata rows
-                    for (int i = 0; i < 39; i++)
-                    {
-                        reader.ReadLine();
-                    }
-
-                    var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-                    {
-                        HasHeaderRecord = true,
-                        MissingFieldFound = null,
-                        HeaderValidated = null
-                    };
-
-                    using (var csv = new CsvReader(reader, config))
-                    {
-                         csv.Read();
-                         csv.ReadHeader();
-
-                        while (csv.Read())
-                        {
-                            DatasetRecord record = new DatasetRecord();
-
-                            record.SampleID = csv.GetField("Sample ID");
-                            record.Species = csv.GetField("Species");
-                            record.Taxon = csv.GetField("Taxon");
-                            record.TissueAnalysed = csv.GetField("Tissue analysed");
-                            record.Location = csv.GetField("Location");
-                            record.CollectionDate = csv.GetField("Collection date");
-
-                            record.Latitude = csv.GetField("Latitude");
-                            record.Longitude = csv.GetField("Longitude");
-                            record.Depth = csv.GetField("Depth (m)");
-                            record.NumberOfIndividuals = csv.GetField("n (ind)");
-
-                            record.D13C = csv.GetField("d13C (�)");
-                            record.D15N = csv.GetField("d15N (�)");
-                            record.D34S = csv.GetField("d34S (�)");
-
-                            record.MeHg = csv.GetField("MeHg (ng/g, DW)");
-                            
-
-                            records.Add(record);
-
-                            // only load first 5 records
-                            if (records.Count >= 5)
-                                break;
-                        }
-                    }
-                }
-
-                foreach (var record in records)
-                    {
-                        Console.WriteLine($"Sample ID: {record.SampleID}");
-                        Console.WriteLine($"Species: {record.Species}");
-                        Console.WriteLine($"Taxon: {record.Taxon}");
-                        Console.WriteLine($"Tissue: {record.TissueAnalysed}");
-                        Console.WriteLine($"Location: {record.Location}");
-                        Console.WriteLine($"Date: {record.CollectionDate}");
-                        Console.WriteLine($"Latitude: {record.Latitude}");
-                        Console.WriteLine($"Longitude: {record.Longitude}");
-                        Console.WriteLine($"Depth: {record.Depth}");
-                        Console.WriteLine($"Individuals: {record.NumberOfIndividuals}");
-                        Console.WriteLine($"d13C: {record.D13C}");
-                        Console.WriteLine($"d15N: {record.D15N}");
-                        Console.WriteLine($"d34S: {record.D34S}");
-                        Console.WriteLine($"MeHg: {record.MeHg}");
-                        Console.WriteLine("-------------------------------------");
-                    }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-
-            Console.ReadKey();
+            menu.Run();
         }
     }
 }
