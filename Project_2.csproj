@@ -8,6 +8,18 @@
     <RootNamespace>Project_2</RootNamespace>
   </PropertyGroup>
 
+  <!--
+    Project_2.Tests lives in a sub-folder of this project (Project_2\Project_2.Tests),
+    rather than alongside it. The SDK-style default compile glob (*.cs in every
+    sub-folder) would otherwise pull the test class into this project too, which
+    fails to build because this project does not reference xUnit. The test project
+    is built and run on its own via Project_2.Tests.csproj instead.
+  -->
+  <ItemGroup>
+    <Compile Remove="Project_2.Tests\**\*.cs" />
+    <None Remove="Project_2.Tests\**\*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
